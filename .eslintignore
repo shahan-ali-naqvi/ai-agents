@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+public
+next-env.d.ts
+build
+dist
+*.lock
+*/api/* 

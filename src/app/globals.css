@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+:root {
+  --narvik: #EAE7DD;
+  --narvik-100: #F5F3ED;
+  --narvik-200: #E0DCD0;
+  --narvik-300: #D6D1C2;
+  --narvik-400: #C7C0AD;
+  --sorrell: #99775C;
+  --sorrell-100: #B09780;
+  --sorrell-200: #8A6A52;
+  --sorrell-300: #7D5F4A;
+  --sorrell-400: #705443;
+  --sorrell-500: #624A3B;
+  --sorrell-600: #553F33;
+  --sorrell-700: #47352B;
+  --sorrell-800: #382A22;
+  --sorrell-900: #2A1F19;
+  --accent: #BE8A60;
+  --accent-light: #D4A77C;
+  --accent-dark: #A46E44;
+  --success: #5A8970;
+  --warning: #C7996A;
+  --danger: #C75A5A;
+}
+
+@theme inline {
+  --color-background: var(--narvik);
+  --color-foreground: var(--sorrell-800);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--narvik);
+  color: var(--sorrell-800);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+input, textarea, select {
+  color: var(--sorrell-800);
+  background-color: var(--narvik-100);
+  border-color: var(--sorrell-100);
+  transition: all 0.2s ease-in-out;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(190, 138, 96, 0.15);
+}
+
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, var(--accent-light), var(--accent), var(--accent-dark));
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent-light), var(--accent), var(--accent-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.card {
+  background-color: white;
+  border: 1px solid var(--narvik-300);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(56, 42, 34, 0.05);
+}
+
+.section-title {
+  font-weight: 600;
+  color: var(--sorrell-800);
+  margin-bottom: 1rem;
+}
+
+.text-muted {
+  color: var(--sorrell-300);
+}
+
+.result-card {
+  background-color: var(--narvik-100);
+  border: 1px solid var(--narvik-300);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
