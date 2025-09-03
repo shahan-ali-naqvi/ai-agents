@@ -99,7 +99,8 @@ export async function POST(
           currentInput,
           step.instructions,
           step.requiredOutput,
-          chainData.openAiApiKey
+          chainData.openAiApiKey,
+          step.model || 'gpt-3.5-turbo'
         );
         
         results.push({
@@ -141,7 +142,8 @@ async function processStep(
   input: string,
   instructions: string,
   requiredOutput: string,
-  apiKey: string
+  apiKey: string,
+  model: string = 'gpt-3.5-turbo'
 ): Promise<string> {
   try {
     // Initialize OpenAI client with the chain's API key
@@ -160,7 +162,7 @@ async function processStep(
 
     // Call OpenAI API
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // or other appropriate model
+      model: model,
       messages: [
         { role: "system", content: systemMessage },
         { role: "user", content: input }

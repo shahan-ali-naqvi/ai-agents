@@ -65,7 +65,8 @@ Input: ${currentInput}
           currentInput,
           enhancedInstructions,
           step.requiredOutput,
-          chainData.openAiApiKey // Pass the stored API key
+          chainData.openAiApiKey, // Pass the stored API key
+          step.model || 'gpt-3.5-turbo' // Pass the step-specific model
         );
         
         // Add this step's result to our results array
@@ -111,7 +112,8 @@ async function processStep(
   input: string,
   instructions: string,
   requiredOutput: string,
-  apiKey: string // Add API key parameter
+  apiKey: string, // Add API key parameter
+  model: string = 'gpt-3.5-turbo' // Add model parameter with default
 ): Promise<string> {
   try {
     // Initialize OpenAI client with the chain's API key
@@ -136,7 +138,7 @@ async function processStep(
 
     // Call OpenAI API with more temperature control for precise calculations
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: model,
       messages: [
         { role: "system", content: systemMessage },
         { role: "user", content: input }

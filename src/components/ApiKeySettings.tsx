@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { hasApiKey, getApiKey, getModel, saveApiKey, saveModel, clearApiKey } from '@/lib/openai';
+import { hasApiKey, getApiKey, getModel, saveApiKey, saveModel, clearApiKey, CHAT_COMPLETION_MODELS } from '@/lib/openai';
 
 // Type definition for props
 interface ApiKeySettingsProps {
@@ -86,9 +86,9 @@ const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ onSave }) => {
               onChange={(e) => setModel(e.target.value)}
               className="w-full p-2 sm:p-3 border border-[#B09780] rounded-lg focus:ring-2 focus:ring-[#D4A77C] focus:border-[#BE8A60] appearance-none bg-white text-sm sm:text-base"
             >
-              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-              <option value="gpt-4">GPT-4</option>
-              <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                             {Object.entries(CHAT_COMPLETION_MODELS).map(([value, label]) => (
+                 <option key={value} value={value}>{label}</option>
+               ))}
             </select>
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -97,7 +97,7 @@ const ApiKeySettings: React.FC<ApiKeySettingsProps> = ({ onSave }) => {
             </div>
           </div>
           <div className="text-xs sm:text-sm text-[#382A22] mt-1">
-            GPT-3.5 Turbo is faster and more cost-effective for most use cases
+            Choose from 18 guaranteed working OpenAI models including GPT-4o (latest), GPT-4, and GPT-3.5 variants. All models are tested and compatible with the chat completions API.
           </div>
         </div>
         

@@ -188,7 +188,7 @@ export async function POST(
         `;
         
         const response = await openaiInstance.chat.completions.create({
-          model: "gpt-3.5-turbo",
+          model: step.model || "gpt-3.5-turbo",
           messages: [
             { role: "system", content: systemMessage },
             { role: "user", content: currentInput }

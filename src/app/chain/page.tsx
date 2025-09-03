@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { hasApiKey, getApiKey, getModel } from '@/lib/openai';
+import { hasApiKey, getApiKey, getModel, CHAT_COMPLETION_MODELS } from '@/lib/openai';
 import ApiKeySettings from '@/components/ApiKeySettings';
 import { auth } from '@/lib/firebase';
 
@@ -12,6 +12,7 @@ type ChainStep = {
   instructions: string;
   requiredOutput: string;
   result: string;
+  model: string;
   loading?: boolean;
   error?: string;
 };
@@ -25,6 +26,7 @@ export default function ChainProcessPage() {
       instructions: '',
       requiredOutput: '',
       result: '',
+      model: 'gpt-3.5-turbo',
       loading: false,
       error: ''
     }
@@ -74,7 +76,7 @@ export default function ChainProcessPage() {
           instructions: step.instructions,
           requiredOutput: step.requiredOutput,
           apiKey: getApiKey(),
-          model: getModel()
+          model: step.model
         })
       });
       const data = await res.json();
@@ -125,7 +127,7 @@ export default function ChainProcessPage() {
           instructions: step.instructions,
           requiredOutput: step.requiredOutput,
           apiKey: getApiKey(),
-          model: getModel()
+          model: step.model
         })
       });
       const data = await res.json();
@@ -192,6 +194,7 @@ export default function ChainProcessPage() {
         instructions: '',
         requiredOutput: '',
         result: '',
+        model: 'gpt-3.5-turbo',
         loading: false,
         error: ''
       }
@@ -258,7 +261,8 @@ export default function ChainProcessPage() {
           id: step.id,
           inputStatement: step.inputStatement,
           instructions: step.instructions,
-          requiredOutput: step.requiredOutput
+          requiredOutput: step.requiredOutput,
+          model: step.model
         }))
       };
       
@@ -395,7 +399,36 @@ export default function ChainProcessPage() {
               return;
             }
             
-            const configData = JSON.stringify(steps, null, 2);
+            // Create comprehensive chain configuration including models and metadata
+            const chainConfig = {
+              metadata: {
+                name: 'Chain Process Configuration',
+                version: '1.0',
+                createdAt: new Date().toISOString(),
+                totalSteps: steps.length,
+                description: 'Multi-step AI process chain with per-step model selection'
+              },
+              steps: steps.map(step => ({
+                id: step.id,
+                inputStatement: step.inputStatement,
+                instructions: step.instructions,
+                requiredOutput: step.requiredOutput,
+                model: step.model,
+                result: step.result,
+                error: step.error
+              })),
+              models: {
+                availableModels: Object.keys(CHAT_COMPLETION_MODELS),
+                modelDescriptions: CHAT_COMPLETION_MODELS
+              },
+              apiInfo: {
+                endpoint: '/api/chain-process',
+                method: 'POST',
+                compatibleModels: 'Chat completion models only'
+              }
+            };
+            
+            const configData = JSON.stringify(chainConfig, null, 2);
             const blob = new Blob([configData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -436,15 +469,31 @@ export default function ChainProcessPage() {
                 reader.onload = (event) => {
                   try {
                     const config = JSON.parse(event.target?.result as string);
-                    if (Array.isArray(config) && config.length > 0) {
-                      const stepsWithNewIds = config.map((step, index) => ({
+                    
+                    // Handle both old format (array of steps) and new format (comprehensive config)
+                    let stepsData;
+                    if (Array.isArray(config)) {
+                      // Old format - direct array of steps
+                      stepsData = config;
+                    } else if (config.steps && Array.isArray(config.steps)) {
+                      // New format - comprehensive config with steps
+                      stepsData = config.steps;
+                      console.log('Loaded comprehensive chain config:', config.metadata);
+                    } else {
+                      throw new Error('Invalid configuration format');
+                    }
+                    
+                    if (stepsData.length > 0) {
+                      const stepsWithNewIds = stepsData.map((step: any, index: number) => ({
                         ...step,
-                        id: Date.now() + index
+                        id: Date.now() + index,
+                        // Ensure model is set, default to gpt-3.5-turbo if missing
+                        model: step.model || 'gpt-3.5-turbo'
                       }));
                       setSteps(stepsWithNewIds);
                     }
-                  } catch (error) {
-                    alert('Invalid configuration file');
+                  } catch (error: any) {
+                    alert('Invalid configuration file: ' + (error.message || 'Unknown error'));
                   }
                 };
                 reader.readAsText(file);
@@ -536,6 +585,19 @@ export default function ChainProcessPage() {
                 disabled={step.loading}
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-[#624A3B] mb-1">Model</label>
+              <select
+                className="w-full p-2 border border-[#B09780] rounded-md focus:ring-2 focus:ring-[#D4A77C] focus:border-[#BE8A60] text-[#382A22] bg-[#F5F3ED]"
+                value={step.model}
+                onChange={e => handleInputChange(step.id, 'model', e.target.value)}
+                disabled={step.loading}
+              >
+                                 {Object.entries(CHAT_COMPLETION_MODELS).map(([value, label]) => (
+                   <option key={value} value={value}>{label}</option>
+                 ))}
+              </select>
+            </div>
           </div>
           {/* Process Button or Result */}
           {!step.result ? (
@@ -556,6 +618,15 @@ export default function ChainProcessPage() {
             <div className="mt-4 bg-[#F5F3ED] border border-[#D6D1C2] rounded-md p-4">
               <div className="text-xs text-[#8A6A52] mb-1">Result</div>
               <pre className="whitespace-pre-wrap text-[#382A22] text-sm overflow-auto max-h-60 bg-white p-3 border border-[#E0DCD0] rounded">{step.result}</pre>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(step.result);
+                  alert('Result copied to clipboard!');
+                }}
+                className="mt-2 text-[#8A6A52] hover:text-[#624A3B] text-sm"
+              >
+                Copy Result
+              </button>
             </div>
           )}
           {step.error && (
@@ -641,9 +712,20 @@ export default function ChainProcessPage() {
                             {result.error}
                           </div>
                         ) : (
-                          <pre className="text-sm mt-1 whitespace-pre-wrap overflow-auto max-h-60 bg-white p-3 border border-[#E0DCD0] rounded text-[#382A22]">
-                            {result.result}
-                          </pre>
+                          <div>
+                            <pre className="text-sm mt-1 whitespace-pre-wrap overflow-auto max-h-60 bg-white p-3 border border-[#E0DCD0] rounded text-[#382A22]">
+                              {result.result}
+                            </pre>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(result.result);
+                                alert('Result copied to clipboard!');
+                              }}
+                              className="mt-2 text-[#8A6A52] hover:text-[#624A3B] text-sm"
+                            >
+                              Copy Result
+                            </button>
+                          </div>
                         )}
                       </div>
                     );

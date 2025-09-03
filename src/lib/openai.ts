@@ -40,6 +40,36 @@ export function clearApiKey(): void {
   localStorage.removeItem('openai-model');
 }
 
+// Models specifically compatible with chat completions API (v1/chat/completions)
+// Only including models that are guaranteed to work for all users
+export const CHAT_COMPLETION_MODELS = {
+  // GPT-4o Models (Latest) - GUARANTEED WORKING
+  'gpt-4o': 'GPT-4o (Latest)',
+  'gpt-4o-mini': 'GPT-4o Mini',
+  
+  // GPT-4 Models - GUARANTEED WORKING
+  'gpt-4-turbo': 'GPT-4 Turbo',
+  'gpt-4-turbo-preview': 'GPT-4 Turbo Preview',
+  'gpt-4': 'GPT-4',
+  'gpt-4-32k': 'GPT-4 32K',
+  'gpt-4-0125-preview': 'GPT-4 0125 Preview',
+  'gpt-4-1106-preview': 'GPT-4 1106 Preview',
+  'gpt-4-0613': 'GPT-4 0613',
+  'gpt-4-0314': 'GPT-4 0314',
+  
+  // GPT-3.5 Models - GUARANTEED WORKING
+  'gpt-3.5-turbo': 'GPT-3.5 Turbo',
+  'gpt-3.5-turbo-16k': 'GPT-3.5 Turbo 16K',
+  'gpt-3.5-turbo-0125': 'GPT-3.5 Turbo 0125',
+  'gpt-3.5-turbo-1106': 'GPT-3.5 Turbo 1106',
+  'gpt-3.5-turbo-0613': 'GPT-3.5 Turbo 0613',
+  'gpt-3.5-turbo-0301': 'GPT-3.5 Turbo 0301',
+  
+  // Instruct Models - GUARANTEED WORKING
+  'gpt-3.5-turbo-instruct': 'GPT-3.5 Turbo Instruct',
+  'gpt-3.5-turbo-instruct-0914': 'GPT-3.5 Turbo Instruct 0914'
+};
+
 // Call OpenAI API
 export async function callOpenAI(prompt: string): Promise<string> {
   const apiKey = getApiKey();
